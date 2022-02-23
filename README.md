@@ -5,7 +5,7 @@ A docker container image for debug
 
 ```sh
 $ clone https://github.com/ktmrmshk/kitbox.git
-$ cd kitbox
+$ cd kitbox/docker
 $ docker build -t ghcr.io/ktmrmshk/kitabox_arm64:latest .
 
 $ export CR_PAT=YOUR_TOKEN
