@@ -4,17 +4,20 @@ from kitbox import object_storage
 import urllib
 
 CONFIG={}
-CONFIG['AWS_ACCESS_KEY']=os.environ.get('AWS_ACCESS_KEY', None)
-CONFIG['AWS_SECRET_KEY']=os.environ.get('AWS_SECRET_KEY', None)
-CONFIG['AWS_SESSION_TOKEN']=os.environ.get('AWS_SESSION_TOKEN', None)
+CONFIG['aws_access_key_id']=os.environ.get('AWS_ACCESS_KEY', None)
+CONFIG['aws_secret_access_key']=os.environ.get('AWS_SECRET_KEY', None)
+CONFIG['aws_session_token']=os.environ.get('AWS_SESSION_TOKEN', None)
 
 class object_storage_s3(object_storage.object_storage):
-  def __init__(self):
+  def __init__(self, config=None):
+    if not config:
+      config = CONFIG
+
     self.storage_type='s3'
     _session = boto3.session.Session(
-        aws_access_key_id = CONFIG['AWS_ACCESS_KEY'],
-        aws_secret_access_key = CONFIG['AWS_SECRET_KEY'],
-        aws_session_token = CONFIG['AWS_SESSION_TOKEN']
+        aws_access_key_id = config['aws_access_key_id'],
+        aws_secret_access_key = config['aws_secret_access_key'],
+        aws_session_token = config['aws_session_token']
         )
     self.s3 = _session.resource('s3')
 
