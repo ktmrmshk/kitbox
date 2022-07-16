@@ -1,12 +1,13 @@
 import boto3
 import os
 from kitbox import object_storage
-import urllib
+import urllib, configparser
 
 CONFIG={}
 CONFIG['aws_access_key_id']=os.environ.get('AWS_ACCESS_KEY', None)
 CONFIG['aws_secret_access_key']=os.environ.get('AWS_SECRET_KEY', None)
 CONFIG['aws_session_token']=os.environ.get('AWS_SESSION_TOKEN', None)
+
 
 class object_storage_s3(object_storage.object_storage):
   def __init__(self, config=None):
@@ -68,6 +69,21 @@ class object_storage_s3(object_storage.object_storage):
     else:
       self.s3.Object(bucket, path).delete()
 
+  @staticmethod
+  def get_config_s3(config_file=None, profile='default'):
+    '''
+    return config dict
+    '''
+    if not config_file:
+      config_file = os.environ['HOME'] + '/.aws/credentials'
+
+    cp = configparser.ConfigParser()
+    cp.read(config_file)
+    config={}
+    config['aws_access_key_id']=cp[profile].get('aws_access_key_id')
+    config['aws_secret_access_key']=cp[profile].get('aws_secret_access_key')
+    config['aws_session_token']=cp[profile].get('aws_session_token')
+    return config
 
 def example_app():
   s3 = object_storage_s3()

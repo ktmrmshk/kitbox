@@ -58,6 +58,20 @@ class TestObjectStorageS3(unittest.TestCase):
     self.s3.put_object(obj=b'kita123', dst=d+'sub/5.txt')
 
     self.s3.delete(d, recursive=True)
+  
+#  def test_get_config_s3(self):
+#    c1 = object_storage_s3.get_config_s3()
+#    print(c1)
+#
+#    _s3 = object_storage_s3(c1)
+#    print( _s3.ls('s3://airbyte-sink/airbytedata/diamonds/') )
+    
+  def test_get_config_s3_with_file(self):
+    c1 = object_storage_s3.get_config_s3('./dummy_cred.txt', 'default123')
+    print(c1)
+    self.assertTrue( c1['aws_access_key_id'] == 'this_is_dummy1'  )
+    self.assertTrue( c1['aws_secret_access_key'] == 'this_is_dummy2'  )
+    self.assertTrue( c1['aws_session_token'] == None  )
 
 if __name__ == '__main__':
   unittest.main()
