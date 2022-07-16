@@ -13,6 +13,8 @@ class object_storage(object):
   def put(self, src, dst):
     pass
 
-  def delete(self, dst):
+  def put_object(self, obj, dst):
     pass
 
+  def delete(self, dst):
+    pass

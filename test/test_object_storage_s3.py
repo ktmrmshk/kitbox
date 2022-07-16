@@ -34,9 +34,15 @@ class TestObjectStorageS3(unittest.TestCase):
 
   def test_put(self):
     src = './testdata.parquet'
-    src = './small.dat'
+    #src = './small.dat'
     dst = 's3://kitboxtest/dir1/dir2/testdata.parquet'
     self.s3.put(src, dst)
+
+  def test_put_object(self):
+    obj = b'foobar123'
+    dst = 's3://kitboxtest/dir1/dir2/foobar.txt'
+    self.s3.put_object(obj=obj, dst=dst)
+
 
   def test_delete(self):
 

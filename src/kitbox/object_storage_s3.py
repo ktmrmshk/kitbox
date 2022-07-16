@@ -47,6 +47,14 @@ class object_storage_s3(object_storage.object_storage):
     bucket, path = self.parse_s3url(dst)
     self.s3.Bucket(bucket).upload_file(src, path)
 
+  def put_object(self, obj, dst):
+    '''
+    obj: binary type object for put
+    dst: s3 url
+    '''
+    bucket, path = self.parse_s3url(dst)
+    self.s3.Bucket(bucket).put_object(Body=obj, Key=path)
+
   def delete(self, dst):
     bucket, path = self.parse_s3url(dst)
     self.s3.Object(bucket, path).delete()
