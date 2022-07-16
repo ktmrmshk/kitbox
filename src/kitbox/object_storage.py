@@ -16,5 +16,5 @@ class object_storage(object):
   def put_object(self, obj, dst):
     pass
 
-  def delete(self, dst):
+  def delete(self, dst, recursive=False):
     pass

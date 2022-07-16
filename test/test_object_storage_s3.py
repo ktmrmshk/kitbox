@@ -49,5 +49,15 @@ class TestObjectStorageS3(unittest.TestCase):
     dst = 's3://kitboxtest/dir1/dir2/testdata.parquet'
     self.s3.delete(dst)
 
+  def test_delete_dir(self):
+    d = 's3://kitboxtest/dir1/dir2/dir3/'
+
+    self.s3.put_object(obj=b'kita123', dst=d+'1.txt')
+    self.s3.put_object(obj=b'kita123', dst=d+'2.txt')
+    self.s3.put_object(obj=b'kita123', dst=d+'3.txt')
+    self.s3.put_object(obj=b'kita123', dst=d+'sub/5.txt')
+
+    self.s3.delete(d, recursive=True)
+
 if __name__ == '__main__':
   unittest.main()

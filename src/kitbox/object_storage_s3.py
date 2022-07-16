@@ -6,13 +6,15 @@ import urllib
 CONFIG={}
 CONFIG['AWS_ACCESS_KEY']=os.environ.get('AWS_ACCESS_KEY', None)
 CONFIG['AWS_SECRET_KEY']=os.environ.get('AWS_SECRET_KEY', None)
+CONFIG['AWS_SESSION_TOKEN']=os.environ.get('AWS_SESSION_TOKEN', None)
 
 class object_storage_s3(object_storage.object_storage):
   def __init__(self):
     self.storage_type='s3'
     _session = boto3.session.Session(
         aws_access_key_id = CONFIG['AWS_ACCESS_KEY'],
-        aws_secret_access_key = CONFIG['AWS_SECRET_KEY']
+        aws_secret_access_key = CONFIG['AWS_SECRET_KEY'],
+        aws_session_token = CONFIG['AWS_SESSION_TOKEN']
         )
     self.s3 = _session.resource('s3')
 
@@ -55,9 +57,13 @@ class object_storage_s3(object_storage.object_storage):
     bucket, path = self.parse_s3url(dst)
     self.s3.Bucket(bucket).put_object(Body=obj, Key=path)
 
-  def delete(self, dst):
+  def delete(self, dst, recursive=False):
     bucket, path = self.parse_s3url(dst)
-    self.s3.Object(bucket, path).delete()
+
+    if recursive:
+      self.s3.Bucket(bucket).objects.filter(Prefix=path).delete()
+    else:
+      self.s3.Object(bucket, path).delete()
 
 
 def example_app():
