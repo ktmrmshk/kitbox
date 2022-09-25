@@ -21,6 +21,18 @@ class TestObjectStorageS3(unittest.TestCase):
     self.assertEqual(bucket, 'airbyte-sink')
     self.assertEqual(path, 'airbytedata/diamonds/2022_02_04_1643971474869_0.parquet')
 
+  def test_parse_s3url_r2(self):
+    s3url = 'https://d66757f910d9326d57d80b7f2d7c8475.r2.cloudflarestorage.com/ktmr-r2/foo%2Fbar%2Fdir1%2Ftest.pdf'
+    (bucket, path) = self.s3.parse_s3url(s3url)
+    self.assertEqual(bucket, 'ktmr-r2')
+    self.assertEqual(path, 'foo/bar/dir1/test.pdf')
+  
+  def test_parse_s3url_r2_unquoted(self):
+    s3url = 'https://d66757f910d9326d57d80b7f2d7c8475.r2.cloudflarestorage.com/ktmr-r2/foo/bar/dir1/test.pdf'
+    (bucket, path) = self.s3.parse_s3url(s3url)
+    self.assertEqual(bucket, 'ktmr-r2')
+    self.assertEqual(path, 'foo/bar/dir1/test.pdf')
+
   def test_ls(self):
     url = 's3://airbyte-sink/airbytedata/diamonds/'
     ret = self.s3.ls(url)

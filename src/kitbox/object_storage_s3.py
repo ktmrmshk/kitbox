@@ -3,30 +3,43 @@ import os
 from kitbox import object_storage
 import urllib, configparser
 
-CONFIG={}
-CONFIG['aws_access_key_id']=os.environ.get('AWS_ACCESS_KEY', None)
-CONFIG['aws_secret_access_key']=os.environ.get('AWS_SECRET_KEY', None)
-CONFIG['aws_session_token']=os.environ.get('AWS_SESSION_TOKEN', None)
-
 
 class object_storage_s3(object_storage.object_storage):
   def __init__(self, config=None):
     if not config:
-      config = CONFIG
+      config = object_storage_s3.get_config_s3_from_env()
 
     self.storage_type='s3'
-    _session = boto3.session.Session(
+    self.s3 = boto3.resource(
+        's3',
         aws_access_key_id = config['aws_access_key_id'],
         aws_secret_access_key = config['aws_secret_access_key'],
-        aws_session_token = config['aws_session_token']
-        )
-    self.s3 = _session.resource('s3')
+        aws_session_token = config['aws_session_token'],
+        region_name = config['aws_region'],
+        endpoint_url = config['aws_endpoint_url']
+    )
 
   def parse_s3url(self, s3url):
-    parsed = urllib.parse.urlparse(s3url)
-    bucket = parsed.netloc
-    path = parsed.path[1:] # trim first '/'
-    return (bucket, path)
+    '''
+    s3url: 
+      1) starts with 's3://' => s3 native
+      2) starts with 'https://' and contains 'r2.cloudflarestorage.com' => CloudFlare  R2
+    '''
+    if s3url.startswith('s3://'):
+      parsed = urllib.parse.urlparse(s3url)
+      bucket = parsed.netloc
+      path = parsed.path[1:] # trim first '/'
+      return (bucket, path)
+
+    elif s3url.startswith('https://') and 'r2.cloudflarestorage.com' in s3url:
+      parsed = urllib.parse.urlparse(s3url)
+      bucket = parsed.path.split('/')[1]
+      raw_path = '/'.join(parsed.path.split('/')[2:])
+      path = urllib.parse.unquote( raw_path ) # trim first '/'
+      return (bucket, path)
+
+    else:
+      raise Exception('s3url is invalid')
 
   def ls(self, dst):
     '''
@@ -83,7 +96,19 @@ class object_storage_s3(object_storage.object_storage):
     config['aws_access_key_id']=cp[profile].get('aws_access_key_id')
     config['aws_secret_access_key']=cp[profile].get('aws_secret_access_key')
     config['aws_session_token']=cp[profile].get('aws_session_token')
+    config['aws_endpoint_url']=cp[profile].get('aws_endpoint_url')
+    config['aws_region']=cp[profile].get('aws_region')
     return config
+
+  @staticmethod
+  def get_config_s3_from_env():
+    CONFIG={}
+    CONFIG['aws_access_key_id']=os.environ.get('AWS_ACCESS_KEY', None)
+    CONFIG['aws_secret_access_key']=os.environ.get('AWS_SECRET_KEY', None)
+    CONFIG['aws_session_token']=os.environ.get('AWS_SESSION_TOKEN', None)
+    CONFIG['aws_endpoint_url']=os.environ.get('AWS_ENDPOINT_URL', None)
+    CONFIG['aws_region']=os.environ.get('AWS_REGION', None)
+    return CONFIG
 
 def example_app():
   s3 = object_storage_s3()
